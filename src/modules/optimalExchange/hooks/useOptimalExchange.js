@@ -21,7 +21,6 @@ export function useOptimalExchange() {
       ];
       const res = await fetchOptimalExchange(tests);
       setResults(res);
-      setLoading(false);
     } catch (err) {
       setError(err.message);
     } finally {

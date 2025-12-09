@@ -1,17 +1,30 @@
-// src/modules/optimalExchange/components/OptimalExchangeForm.js
 import React, { useState } from "react";
 import { useOptimalExchange } from "../hooks/useOptimalExchange";
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 export function OptimalExchangeForm() {
-  const [N, setN] = useState(100);
-  const [denominations, setDenominations] = useState("1,2,5,10,20,50");
+  const [tests, setTests] = useState([
+    { N: 100, denominations: "1,2,5,10,20,50" },
+  ]);
 
   const { results, loading, error, calculate } = useOptimalExchange();
 
+  const handleAddTest = () => {
+    setTests([...tests, { N: 100, denominations: "" }]);
+  };
+
+  const handleChange = (index, field, value) => {
+    const updated = [...tests];
+    updated[index][field] = value;
+    setTests(updated);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    calculate(N, denominations);
+    const formattedTests = tests.map((t) => ({
+      N: Number(t.N),
+      denominations: t.denominations.split(",").map(Number),
+    }));
+    calculate(formattedTests);
   };
 
   return (
@@ -19,31 +32,50 @@ export function OptimalExchangeForm() {
       <h1 className="mb-4">Optimal Exchange Simulator</h1>
 
       <form onSubmit={handleSubmit} className="mb-4">
-        <div className="mb-3">
-          <label className="form-label">N (valor máximo)</label>
-          <input
-            type="number"
-            className="form-control"
-            value={N}
-            onChange={(e) => setN(e.target.value)}
-            required
-          />
-        </div>
+        {tests.map((test, idx) => (
+          <div key={idx} className="mb-3 border p-3 rounded">
+            <h6>Input #{idx + 1}</h6>
+            <div className="mb-2">
+              <label className="form-label">N (valor máximo)</label>
+              <input
+                type="number"
+                className="form-control"
+                value={test.N}
+                onChange={(e) => handleChange(idx, "N", e.target.value)}
+                required
+              />
+            </div>
+            <div className="mb-2">
+              <label className="form-label">
+                Denominations (separadas por coma)
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                value={test.denominations}
+                onChange={(e) =>
+                  handleChange(idx, "denominations", e.target.value)
+                }
+                required
+              />
+            </div>
+          </div>
+        ))}
 
-        <div className="mb-3">
-          <label className="form-label">Denominations (separadas por coma)</label>
-          <input
-            type="text"
-            className="form-control"
-            value={denominations}
-            onChange={(e) => setDenominations(e.target.value)}
-            required
-          />
-        </div>
+        <div className="d-flex align-items-center justify-content-start mt-3 gap-3">
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleAddTest}
+          >
+            + Añadir entrada
+          </button>
 
-        <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? "Calculando..." : "Calcular"}
-        </button>
+          <br />
+          <button type="submit" className="btn btn-primary" disabled={loading}>
+            {loading ? "Calculando..." : "Calcular"}
+          </button>
+        </div>
       </form>
 
       {error && <div className="alert alert-danger">{error}</div>}
@@ -55,7 +87,8 @@ export function OptimalExchangeForm() {
             <ul className="list-group list-group-flush">
               {results.map((r, idx) => (
                 <li key={idx} className="list-group-item">
-                  <strong>Average:</strong> {r.average}, <strong>Max:</strong> {r.max}
+                  <strong>Test #{idx + 1}:</strong> Average: {r.average}, Max:{" "}
+                  {r.max}
                 </li>
               ))}
             </ul>

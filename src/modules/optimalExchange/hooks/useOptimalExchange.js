@@ -1,4 +1,3 @@
-// src/modules/optimalExchange/hooks/useOptimalExchange.js
 import { useState } from "react";
 import { fetchOptimalExchange } from "../services/api";
 
@@ -7,18 +6,12 @@ export function useOptimalExchange() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const calculate = async (N, denominations) => {
+  const calculate = async (tests) => { 
     setLoading(true);
     setError("");
     setResults([]);
 
     try {
-      const tests = [
-        {
-          N: Number(N),
-          denominations: denominations.split(",").map(Number)
-        }
-      ];
       const res = await fetchOptimalExchange(tests);
       setResults(res);
     } catch (err) {
@@ -28,5 +21,5 @@ export function useOptimalExchange() {
     }
   };
 
-  return { results, loading, error, calculate };
+  return { results, loading, error, calculate, setError };
 }
